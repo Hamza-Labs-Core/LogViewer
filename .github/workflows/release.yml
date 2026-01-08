@@ -29,11 +29,6 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Update version in project
-        run: |
-          # Update marketing version
-          sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = ${{ steps.version.outputs.VERSION }};/" LogViewer.xcodeproj/project.pbxproj
-
       - name: Build app
         run: |
           xcodebuild -project LogViewer.xcodeproj \
