@@ -1,32 +1,35 @@
 import Foundation
 
-actor ProcessLogRepository: LogStreamer {
+final class ProcessLogRepository: LogStreamer, @unchecked Sendable {
     private var process: Process?
     private var outputPipe: Pipe?
     private var continuation: AsyncStream<LogEntry>.Continuation?
+    private let lock = NSLock()
 
     func startStreaming(predicate: String?) -> AsyncStream<LogEntry> {
-        AsyncStream { continuation in
-            self.continuation = continuation
+        AsyncStream { [weak self] continuation in
+            self?.lock.lock()
+            self?.continuation = continuation
+            self?.lock.unlock()
 
-            Task {
-                await self.startProcess(predicate: predicate, continuation: continuation)
-            }
+            self?.startProcess(predicate: predicate, continuation: continuation)
 
             continuation.onTermination = { @Sendable _ in
-                Task {
-                    await self.stopStreaming()
+                Task { [weak self] in
+                    await self?.stopStreaming()
                 }
             }
         }
     }
 
     func stopStreaming() async {
+        lock.lock()
         process?.terminate()
         process = nil
         outputPipe = nil
         continuation?.finish()
         continuation = nil
+        lock.unlock()
     }
 
     private func startProcess(predicate: String?, continuation: AsyncStream<LogEntry>.Continuation) {
@@ -67,14 +70,16 @@ actor ProcessLogRepository: LogStreamer {
 
         do {
             try process.run()
+            lock.lock()
             self.process = process
             self.outputPipe = pipe
+            lock.unlock()
         } catch {
             continuation.finish()
         }
     }
 
-    private nonisolated func parseJSONLogEntry(_ data: Data) -> LogEntry? {
+    private func parseJSONLogEntry(_ data: Data) -> LogEntry? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
@@ -108,13 +113,13 @@ actor ProcessLogRepository: LogStreamer {
         )
     }
 
-    private nonisolated func parseTimestamp(_ string: String) -> Date? {
+    private func parseTimestamp(_ string: String) -> Date? {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter.date(from: string)
     }
 
-    private nonisolated func parseLevel(_ string: String?) -> LogLevel {
+    private func parseLevel(_ string: String?) -> LogLevel {
         guard let string = string?.lowercased() else { return .info }
 
         switch string {
