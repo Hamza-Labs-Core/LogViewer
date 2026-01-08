@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  SCHEME: LogViewer
+  PRODUCT_NAME: LogViewer
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update version in project
+        run: |
+          # Update marketing version
+          sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = ${{ steps.version.outputs.VERSION }};/" LogViewer.xcodeproj/project.pbxproj
+
+      - name: Build app
+        run: |
+          xcodebuild -project LogViewer.xcodeproj \
+            -scheme $SCHEME \
+            -configuration Release \
+            -derivedDataPath build \
+            -arch arm64 -arch x86_64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Create DMG
+        run: |
+          # Create staging directory
+          mkdir -p staging
+          cp -R "build/Build/Products/Release/$PRODUCT_NAME.app" staging/
+
+          # Create DMG
+          hdiutil create -volname "$PRODUCT_NAME" \
+            -srcfolder staging \
+            -ov -format UDZO \
+            "$PRODUCT_NAME-${{ steps.version.outputs.VERSION }}.dmg"
+
+      - name: Create ZIP
+        run: |
+          cd staging
+          zip -r -y "../$PRODUCT_NAME-${{ steps.version.outputs.VERSION }}.zip" "$PRODUCT_NAME.app"
+
+      - name: Generate Changelog
+        id: changelog
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: .github/cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.PRODUCT_NAME }} v${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.content }}
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          files: |
+            ${{ env.PRODUCT_NAME }}-${{ steps.version.outputs.VERSION }}.dmg
+            ${{ env.PRODUCT_NAME }}-${{ steps.version.outputs.VERSION }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-changelog:
+    name: Update Changelog
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Full Changelog
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: .github/cliff.toml
+          args: --verbose
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Commit Changelog
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update CHANGELOG.md for v${{ github.ref_name }}"
+          file_pattern: CHANGELOG.md
+          branch: main

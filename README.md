@@ -1,5 +1,10 @@
 # LogViewer
 
+[![CI](https://github.com/Hamza-Labs-Core/LogViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Hamza-Labs-Core/LogViewer/actions/workflows/ci.yml)
+[![Release](https://github.com/Hamza-Labs-Core/LogViewer/actions/workflows/release.yml/badge.svg)](https://github.com/Hamza-Labs-Core/LogViewer/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/Hamza-Labs-Core/LogViewer)](https://github.com/Hamza-Labs-Core/LogViewer/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A powerful macOS log viewer and system restart analyzer built with SwiftUI.
 
 ## Screenshots
@@ -35,10 +40,23 @@ A powerful macOS log viewer and system restart analyzer built with SwiftUI.
 ### Export
 - Export logs in Plain Text, JSON, or CSV format
 
+## Installation
+
+### Download
+Download the latest release from the [Releases page](https://github.com/Hamza-Labs-Core/LogViewer/releases/latest).
+
+- **DMG** - Disk image for easy installation
+- **ZIP** - Compressed app bundle
+
+### Homebrew (coming soon)
+```bash
+brew install --cask logviewer
+```
+
 ## Requirements
 
 - macOS 14.0 or later
-- Xcode 15.0 or later (for building)
+- Xcode 15.0 or later (for building from source)
 
 ## Permissions
 
@@ -108,6 +126,26 @@ Click the Play button in the toolbar after selecting Live Stream.
 
 ### System Restarts empty
 No kernel panics have occurred recently. The app reads from `/Library/Logs/DiagnosticReports/`.
+
+## Creating a Release
+
+To create a new release:
+
+```bash
+# Create and push a version tag
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This will automatically:
+1. Build the app for macOS (Universal binary)
+2. Create DMG and ZIP artifacts
+3. Generate changelog from commits
+4. Create a GitHub release with all artifacts
+
+Use semantic versioning: `vMAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v1.1.0`, `v2.0.0`)
+
+For pre-releases, use suffixes: `v1.0.0-alpha`, `v1.0.0-beta`, `v1.0.0-rc1`
 
 ## License
 
