@@ -2,6 +2,14 @@
 
 A powerful macOS log viewer and system restart analyzer built with SwiftUI.
 
+## Screenshots
+
+### Log Viewer
+![App Logs](Assets/Screenshots/app-logs.png)
+
+### System Restart Analysis
+![System Restarts](Assets/Screenshots/restarts.png)
+
 ## Features
 
 ### Log Sources
