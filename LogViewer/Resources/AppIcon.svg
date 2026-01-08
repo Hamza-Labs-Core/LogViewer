@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="100%" style="stop-color:#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="docGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#F1F5F9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="64" y="64" width="896" height="896" rx="180" ry="180" fill="url(#bgGradient)"/>
+
+  <!-- Document/Log viewer shape -->
+  <g filter="url(#shadow)">
+    <rect x="200" y="180" width="500" height="664" rx="32" ry="32" fill="url(#docGradient)"/>
+  </g>
+
+  <!-- Log lines -->
+  <rect x="248" y="260" width="180" height="24" rx="12" fill="#94A3B8"/>
+  <rect x="248" y="310" width="400" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="248" y="360" width="320" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="248" y="410" width="380" height="24" rx="12" fill="#CBD5E1"/>
+
+  <!-- Error/Warning line (red) -->
+  <rect x="248" y="460" width="280" height="24" rx="12" fill="#EF4444"/>
+
+  <rect x="248" y="510" width="350" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="248" y="560" width="300" height="24" rx="12" fill="#CBD5E1"/>
+
+  <!-- Warning line (orange) -->
+  <rect x="248" y="610" width="260" height="24" rx="12" fill="#F97316"/>
+
+  <rect x="248" y="660" width="380" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="248" y="710" width="320" height="24" rx="12" fill="#CBD5E1"/>
+  <rect x="248" y="760" width="200" height="24" rx="12" fill="#94A3B8"/>
+
+  <!-- Magnifying glass -->
+  <g transform="translate(580, 520)">
+    <circle cx="120" cy="120" r="100" fill="none" stroke="#FFFFFF" stroke-width="36" opacity="0.95"/>
+    <line x1="190" y1="190" x2="280" y2="280" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round" opacity="0.95"/>
+    <!-- Inner glass highlight -->
+    <circle cx="120" cy="120" r="60" fill="none" stroke="#FFFFFF" stroke-width="8" opacity="0.4"/>
+  </g>
+</svg>
