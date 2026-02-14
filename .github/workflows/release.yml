@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 env:
   SCHEME: LogViewer
   PRODUCT_NAME: LogViewer
