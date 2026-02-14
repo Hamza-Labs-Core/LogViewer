@@ -59,14 +59,17 @@ jobs:
           cd staging
           zip -r -y "../$PRODUCT_NAME-${{ steps.version.outputs.VERSION }}.zip" "$PRODUCT_NAME.app"
 
+      - name: Install git-cliff
+        run: brew install git-cliff
+
       - name: Generate Changelog
         id: changelog
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: .github/cliff.toml
-          args: --latest --strip header
-        env:
-          OUTPUT: CHANGELOG.md
+        run: |
+          CONTENT=$(git-cliff --config .github/cliff.toml --latest --strip header)
+          # Use delimiter to handle multiline output
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
